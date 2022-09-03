@@ -29,5 +29,8 @@ curl -o server https://strepo.jacobtread.com/drivepi/server
 # Replace the local samba config with the drivepi config
 curl -o /etc/samba/smb.conf https://strepo.jacobtread.com/drivepi/smb.conf
 
+# Restart samba
+service smbd restart
+
 # Execute permission on server
 chmod +x server
