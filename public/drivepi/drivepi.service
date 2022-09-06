@@ -1,0 +1,10 @@
+[Unit]
+Description=Drive-PI automatic startup service
+
+[Service]
+ExecStart=/bin/drivepi/start.sh
+Restart=on-failure
+EnvironmentFile=/etc/environment
+
+[Install]
+WantedBy=multi-user.target

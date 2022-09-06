@@ -8,4 +8,5 @@
 echo "denyinterfaces wlan0" >> /etc/dhcpcd.conf
 # Configure Network Manager to control wlan0 and assume dhcp duties
 echo -e "[main]\nplugins=ifupdown,keyfile\ndhcp=internal\n\n[ifupdown]\nmanaged=true" > /etc/NetworkManager/NetworkManager.conf
+nmcli radio wifi on
 # --------------------------------------------------------------------

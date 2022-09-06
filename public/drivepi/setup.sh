@@ -2,14 +2,21 @@
 # SETUP SCRIPT FOR DRIVE-PI
 # SOURCED: https://strepo.jacobtread.com/drivepi/setup.sh
 
+# Variables to reduce repeated
+repo="https://strepo.jacobtread.com/drivepi/"
+path=/bin/drivepi
+
 # Update the system repositories and run upgrades
 apt-get update && apt-get upgrade -y
 
 # systemd-resolve conflicts with dnsmasq so it must be disabled
+# and replaced with the default 8.8.8.8 dns name server
+# -------------------------------------------------------------
 systemctl disable systemd-resolved
 systemctl stop systemd-resolved
 unlink /etc/resolv.conf
 echo nameserver 8.8.8.8 | tee /etc/resolv.conf
+# -------------------------------------------------------------
 
 # Install network manager, samba and dnsmasq
 apt-get install -y network-manager samba dnsmasq
@@ -30,28 +37,22 @@ echo "address=/.local/10.42.0.1" > /etc/NetworkManager/dnsmasq-shared.d/hosts.co
 # Allow samba through the firewall
 ufw allow samba
 
-# Move to bin directory
-cd /bin || exit
-mkdir drivepi
-cd drivepi || exit
+# Create drivepi paths
+mkdir $path
+cd $path || exit
 
-# Download drivepi server
-curl -o server https://strepo.jacobtread.com/drivepi/server
-# Download the environment variables file
-curl -o .env https://strepo.jacobtread.com/drivepi/env
+# Download server environment config and additional scripts
+curl -o server $repo/server
+curl -o .env $repo/env
+curl -o start.sh $repo/start.sh
+curl -o post.sh $repo/post.sh
 
-# Replace the local samba config with the drivepi config
-curl -o /etc/samba/smb.conf https://strepo.jacobtread.com/drivepi/smb.conf
-
-# Restart samba
-service smbd restart
+# Download and replace configurations for samba and daemon service
+curl -o /etc/samba/smb.conf $repo/smb.conf
+curl -o /etc/systemd/system/drivepi.service $repo/drivepi.service
 
 # Execute permission on server
 chmod +x server
-
-
-echo "Drive-PI Setup Complete. Press Enter To Reboot."
-read -r _
 
 # Reboot to apply changes
 reboot

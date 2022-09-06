@@ -1,5 +1,5 @@
 #!/bin/bash
-# SETUP SCRIPT FOR DRIVE-PI (Ubuntu version)
+# SETUP SCRIPT FOR DRIVE-PI
 # SOURCED: https://strepo.jacobtread.com/drivepi/setup.sh
 
 # Update the system repositories and run upgrades
@@ -27,10 +27,8 @@ echo -e "\n\n127.0.0.1 drivepi.local" >> /etc/hosts
 # Setup dnsmasq config
 echo "address=/.local/10.42.0.1" > /etc/NetworkManager/dnsmasq-shared.d/hosts.conf
 
-
-
 # Allow samba through the firewall
-sudo ufw allow samba
+ufw allow samba
 
 # Move to bin directory
 cd /bin || exit
@@ -46,7 +44,10 @@ curl -o .env https://strepo.jacobtread.com/drivepi/env
 curl -o /etc/samba/smb.conf https://strepo.jacobtread.com/drivepi/smb.conf
 
 # Restart samba
-sudo service smbd restart
+service smbd restart
 
 # Execute permission on server
 chmod +x server
+
+# Reboot to apply changes
+reboot
