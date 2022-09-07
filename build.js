@@ -1,4 +1,7 @@
+const fs = require("fs")
 
+const date = new Date();
+const template = `
 <!doctype html>
 <html lang="en">
 <head>
@@ -9,6 +12,8 @@
     <title>STREPO</title>
 </head>
 <body>
-<h1>Built at Wed Sep 07 2022 13:27:11</h1>
+<h1>Built at ${date.toDateString()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}</h1>
 </body>
 </html>
+`
+fs.writeFileSync("./public/index.html", template)
