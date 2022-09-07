@@ -75,7 +75,7 @@ async function collectContents(dir) {
         return {
             name: item,
             isDir,
-            path: itemPath.replace(/\\/g, '/'),
+            path: itemPath.replace(/\\/g, '/').substring('/public'.length),
             children
         }
     }));
