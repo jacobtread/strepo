@@ -129,6 +129,8 @@ echo "$samba_config" | tee /etc/samba/smb.conf
 service_data="
 [Unit]
 Description=Drive-PI startup service
+Requires=network.target
+After=NetworkManager.service
 
 [Service]
 ExecStart=/bin/drivepi/start.sh
@@ -136,7 +138,7 @@ Restart=on-failure
 EnvironmentFile=/etc/environment
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target
 "
 
 echo "Creating daemon service"
@@ -145,6 +147,7 @@ echo "$service_data" | tee /etc/systemd/system/drivepi.service
 
 # Service startup script
 start_data="
+#!/bin/bash
 nmcli radio wifi on
 # Move to drivepi directory
 cd /bin/drivepi || exit
@@ -154,14 +157,6 @@ sudo ./server
 
 # Write startup script
 echo "$start_data" | tee $path/start.sh
-
-# Post install config
-post_data="
-service drivepi enable
-service drivepi start
-"
-# Write post install script
-echo "$post_data" | tee $path/post.sh
 
 # Wlan Fix script fixes according to: https://gist.github.com/jjsanderson/ab2407ab5fd07feb2bc5e681b14a537a
 # Copy old config
@@ -181,5 +176,10 @@ managed=true
 mv /etc/NetworkManager/NetworkManager.conf /etc/NetworkManager/NetworkManager.old.conf
 echo "$network_config" | tee /etc/NetworkManager/NetworkManager.conf
 nmcli radio wifi on
+
+
+# Enable and start drivepi service
+systemctl enable drivepi
+systemctl start drivepi
 
 reboot
