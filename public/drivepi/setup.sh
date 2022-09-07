@@ -44,7 +44,7 @@ hosts_entry="
 
 # Append drivepi.local to /etc/hosts
 echo "Writing hosts file entry"
-echo -e "$hosts_entry" | tee -a /etc/hosts
+echo "$hosts_entry" | tee -a /etc/hosts
 
 echo "Writing dnsmasq config file"
 # Rename old config
@@ -164,25 +164,22 @@ service drivepi start
 echo "$post_data" | tee $path/post.sh
 
 # Wlan Fix script fixes according to: https://gist.github.com/jjsanderson/ab2407ab5fd07feb2bc5e681b14a537a
-wfix_data="
 # Copy old config
 cp /etc/dhcpcd.conf /etc/dhcpcd.old.conf
 # Tell dhcpcd to ignore wlan0
 echo \"denyinterfaces wlan0\" | tee -a /etc/dhcpcd.conf
 
-network_config=\"
+network_config="
 [main]
 plugins=ifupdown,keyfile
 dhcp=internal
 
 [ifupdown]
 managed=true
-\"
-
-mv /etc/NetworkManager/NetworkManager.conf /etc/NetworkManager/NetworkManager.old.conf
-echo \"\$network_config\" | tee /etc/NetworkManager/NetworkManager.conf
-nmcli radio wifi on
 "
 
-# Write wifi fix script
-echo "$wfix_data" | tee $path/wfix.sh
+mv /etc/NetworkManager/NetworkManager.conf /etc/NetworkManager/NetworkManager.old.conf
+echo "$network_config" | tee /etc/NetworkManager/NetworkManager.conf
+nmcli radio wifi on
+
+reboot
