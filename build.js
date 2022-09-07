@@ -1,7 +1,41 @@
-const fs = require("fs")
+const fs = require("fs/promises");
+const path = require("path");
 
-const date = new Date();
-const template = `
+generateSite().then().catch()
+
+async function generateSite() {
+
+    const contents = await collectContents("public");
+
+    let body = "<ul>"
+
+    const appendItem = (item) => {
+        body += "<li>"
+        if (item.isDir) {
+            body += item.name;
+        } else {
+            body += `<a href="/${item.path}">${item.name}</a>`
+        }
+
+
+        if (item.children.length > 0) {
+            body += "<ul>"
+            for (let child of item.children) {
+                appendItem(child)
+            }
+            body += "</ul>"
+        }
+        body += "</li>"
+    }
+
+    for (let content of contents) {
+        appendItem(content)
+    }
+
+    body += "</ul>"
+
+    const date = new Date();
+    const template = `
 <!doctype html>
 <html lang="en">
 <head>
@@ -12,8 +46,37 @@ const template = `
     <title>STREPO</title>
 </head>
 <body>
-<h1>Built at ${date.toDateString()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}</h1>
+<h1>Updated at ${date.toDateString()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}</h1>
+${body}
 </body>
 </html>
 `
-fs.writeFileSync("./public/index.html", template)
+    await fs.writeFile("./public/index.html", template)
+}
+
+async function collectContents(dir) {
+    let items = await fs.readdir(dir);
+    return await Promise.all(items
+        .filter(item => item !== "index.html")
+        .map(async (item) => {
+        let itemPath = path.join(dir, item);
+        let stat = await fs.lstat(itemPath);
+
+        let children;
+        let isDir = stat.isDirectory()
+
+        if (isDir) {
+            children = await collectContents(itemPath)
+
+        } else {
+            children = []
+        }
+
+        return {
+            name: item,
+            isDir,
+            path: itemPath.replace(/\\/g, '/'),
+            children
+        }
+    }));
+}
